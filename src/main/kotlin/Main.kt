@@ -3,16 +3,23 @@ import com.github.kwhat.jnativehook.keyboard.NativeKeyEvent
 import com.github.kwhat.jnativehook.keyboard.NativeKeyListener
 import javax.swing.*
 import java.awt.*
+import java.awt.datatransfer.StringSelection
 import java.util.logging.Level
 import java.util.logging.Logger
 import javax.sound.sampled.AudioSystem
 import java.io.BufferedInputStream
+import java.time.LocalDateTime
 
 val inputField = JTextField(10).apply { text = "120" }
-const val defaultRemainText = "남은 시간이 여기에 표시됩니다."
+const val defaultRemainText = "남은 시간: "
 val remainLabel = JLabel(defaultRemainText)
 var currentRefreshKey = "R"
 val refreshButton = JButton("갱신하기").apply { isVisible = false }
+val startTimeText = JLabel("")
+var startTime: LocalDateTime? = null
+val callSymCheck = JCheckBox()
+val callSymCheckLabel = JLabel("타이머 끝날 때 ㄱㄱ복사")
+val clipboard = Toolkit.getDefaultToolkit().systemClipboard
 
 var timer: Timer? = null
 var currentShortcutKeyCode = NativeKeyEvent.VC_R  // ← 현재 단축키 기본값
@@ -44,10 +51,20 @@ fun runTimer() {
             if (remainingTime > 0) {
                 remainLabel.text = "남은 시간: $remainingTime 초"
             } else {
-                remainLabel.text = "타이머 종료!"
+                remainLabel.text = ""
                 playSound("kwarosa.wav")
                 refreshButton.isVisible = true
                 timer?.stop()
+
+                // 콜심 체크되어있을 때
+                if (callSymCheck.isSelected && startTime != null) {
+                    val now = LocalDateTime.now()
+                    val hour = "${formatNumber(now.hour)}시"
+                    val min = "${formatNumber(now.minute)}분"
+                    val text = "$hour ${min}시작ㄱㄱㄱㄱㄱㄱㄱㄱㄱㄱㄱㄱㄱㄱㄱㄱㄱㄱㄱㄱㄱㄱㄱㄱㄱㄱㄱㄱㄱㄱㄱㄱㄱㄱㄱㄱㄱㄱㄱㄱㄱ"
+                    val selection = StringSelection(text.plus(System.currentTimeMillis().toString()))
+                    clipboard.setContents(selection, null)
+                }
             }
         }.apply { start() }
     } else {
@@ -82,6 +99,23 @@ fun registerGlobalShortcut() {
     })
 }
 
+fun getStartTime() {
+    val now = LocalDateTime.now()
+    // 15초 정도는 더 줘라 좀
+    startTime = now.plusSeconds(if (now.second >= 45) 15 else 0)
+    startTimeText.text = formatDate(startTime!!)
+}
+
+fun formatNumber(number: Int): String {
+    return String.format("%02d", number)
+}
+
+fun formatDate(date: LocalDateTime): String {
+    return date.run {
+        "${formatNumber(hour)}:${formatNumber(minute)}:${formatNumber(second)}"
+    }
+}
+
 fun main() {
     val frame = JFrame("타이머")
 
@@ -100,10 +134,15 @@ fun main() {
     val shortCutLabel = JLabel("현재 갱신 단축키: $currentRefreshKey")
     shortCutPanel.add(shortCutLabel)
     shortCutPanel.add(changeKeyButton)
+    shortCutPanel.add(refreshButton)
+    shortCutPanel.add(remainLabel)
 
     val resultPanel = JPanel(FlowLayout(FlowLayout.LEFT))
-    resultPanel.add(remainLabel)
-    resultPanel.add(refreshButton)
+    val startTimeButton = JButton("시작시간 갱신")
+    resultPanel.add(startTimeButton)
+    resultPanel.add(startTimeText)
+    resultPanel.add(callSymCheck)
+    resultPanel.add(callSymCheckLabel)
 
     val mainPanel = JPanel()
     mainPanel.layout = BoxLayout(mainPanel, BoxLayout.Y_AXIS)
@@ -119,10 +158,11 @@ fun main() {
     frame.toFront()
     frame.requestFocus()
 
-    // 버튼 이벤트
+    // 이벤트
     startButton.addActionListener { runTimer() }
     endButton.addActionListener { stopTimer() }
     refreshButton.addActionListener { runTimer() }
+    startTimeButton.addActionListener { getStartTime() }
 
     // 전역 단축키 등록
     registerGlobalShortcut()
