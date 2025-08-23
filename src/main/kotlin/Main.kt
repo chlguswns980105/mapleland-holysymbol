@@ -15,8 +15,8 @@ const val defaultRemainText = "남은 시간: "
 val remainLabel = JLabel(defaultRemainText)
 var currentRefreshKey = "R"
 val refreshButton = JButton("갱신하기").apply { isVisible = false }
-val startTimeText = JLabel("")
-var startTime: LocalDateTime? = null
+val startHour = JTextField("00")
+val startMin = JTextField("00")
 val callSymCheck = JCheckBox()
 val callSymCheckLabel = JLabel("타이머 끝날 때 ㄱㄱ복사")
 val clipboard = Toolkit.getDefaultToolkit().systemClipboard
@@ -57,10 +57,9 @@ fun runTimer() {
                 timer?.stop()
 
                 // 콜심 체크되어있을 때
-                if (callSymCheck.isSelected && startTime != null) {
-                    val now = LocalDateTime.now()
-                    val hour = "${formatNumber(now.hour)}시"
-                    val min = "${formatNumber(now.minute)}분"
+                if (callSymCheck.isSelected) {
+                    val hour = "${startHour.getText()}시"
+                    val min = "${startMin.getText()}분"
                     val text = "$hour ${min}시작ㄱㄱㄱㄱㄱㄱㄱㄱㄱㄱㄱㄱㄱㄱㄱㄱㄱㄱㄱㄱㄱㄱㄱㄱㄱㄱㄱㄱㄱㄱㄱㄱㄱㄱㄱㄱㄱㄱㄱㄱㄱ"
                     val selection = StringSelection(text.plus(System.currentTimeMillis().toString()))
                     clipboard.setContents(selection, null)
@@ -93,7 +92,6 @@ fun registerGlobalShortcut() {
                 refreshButton.doClick()
             }
         }
-
         override fun nativeKeyReleased(e: NativeKeyEvent) {}
         override fun nativeKeyTyped(e: NativeKeyEvent) {}
     })
@@ -102,8 +100,9 @@ fun registerGlobalShortcut() {
 fun getStartTime() {
     val now = LocalDateTime.now()
     // 15초 정도는 더 줘라 좀
-    startTime = now.plusSeconds(if (now.second >= 45) 15 else 0)
-    startTimeText.text = formatDate(startTime!!)
+    val startTime = now.plusSeconds(if (now.second >= 45) 15 else 0)
+    startHour.text = formatNumber(startTime.hour)
+    startMin.text = formatNumber(startTime.minute)
 }
 
 fun formatNumber(number: Int): String {
@@ -140,7 +139,8 @@ fun main() {
     val resultPanel = JPanel(FlowLayout(FlowLayout.LEFT))
     val startTimeButton = JButton("시작시간 갱신")
     resultPanel.add(startTimeButton)
-    resultPanel.add(startTimeText)
+    resultPanel.add(startHour)
+    resultPanel.add(startMin)
     resultPanel.add(callSymCheck)
     resultPanel.add(callSymCheckLabel)
 
