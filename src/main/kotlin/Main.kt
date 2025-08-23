@@ -175,7 +175,7 @@ fun main() {
     mainPanel.add(resultPanel)
 
     frame.add(mainPanel)
-    frame.setSize(600, 200)
+    frame.setSize(420, 155)
     frame.defaultCloseOperation = JFrame.EXIT_ON_CLOSE
     frame.isVisible = true
     frame.isAlwaysOnTop = true
