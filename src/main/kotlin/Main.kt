@@ -5,6 +5,7 @@ import com.sun.jna.Pointer
 import com.sun.jna.platform.win32.User32
 import com.sun.jna.platform.win32.WinDef
 import com.sun.jna.platform.win32.WinUser
+import com.sun.jna.platform.win32.Kernel32
 import javax.swing.*
 import java.awt.*
 import java.awt.datatransfer.StringSelection
@@ -14,6 +15,7 @@ import javax.sound.sampled.AudioSystem
 import java.io.BufferedInputStream
 import java.time.LocalDateTime
 
+val frame = JFrame("타이머")
 val inputField = JTextField(10).apply { text = "120" }
 const val defaultRemainText = "남은 시간: "
 val remainLabel = JLabel(defaultRemainText)
@@ -118,6 +120,7 @@ fun formatNumber(number: Int): String {
 
 fun focusMapleStoryWindow() {
     val user32 = User32.INSTANCE
+    val kernel32 = Kernel32.INSTANCE
 
     val enumProc = object : WinUser.WNDENUMPROC {
         override fun callback(hWnd: WinDef.HWND?, lParam: Pointer?): Boolean {
@@ -127,12 +130,29 @@ fun focusMapleStoryWindow() {
                 val title = String(sb).trim { it <= ' ' }
 
                 if (title.contains("Mapleland", ignoreCase = true)) {
+                    // 최소화된 창이면 복원
                     user32.ShowWindow(hWnd, WinUser.SW_RESTORE)
+
+                    // 현재 스레드와 포커스를 가진 스레드를 연결
+                    val fgWnd = user32.GetForegroundWindow()
+                    val kernelId = kernel32.GetCurrentThreadId().toLong()
+                    val currentThreadId = WinDef.DWORD(kernelId)
+                    val processId = user32.GetWindowThreadProcessId(fgWnd, null).toLong()
+                    val fgThreadId = WinDef.DWORD(processId)
+
+                    user32.AttachThreadInput(fgThreadId, currentThreadId, true)
+
+                    // 강제로 포커스
+                    user32.BringWindowToTop(hWnd)
                     user32.SetForegroundWindow(hWnd)
-                    return false
+
+                    // 스레드 입력 연결 해제
+                    user32.AttachThreadInput(fgThreadId, currentThreadId, false)
+
+                    return false // 첫 번째 매칭 후 종료
                 }
             }
-            return true
+            return true // 계속 열거
         }
     }
 
@@ -140,7 +160,6 @@ fun focusMapleStoryWindow() {
 }
 
 fun main() {
-    val frame = JFrame("타이머")
 
     val inputPanel = JPanel(FlowLayout(FlowLayout.LEFT))
     val guideText = JLabel("설정 시간(초):")
