@@ -1,6 +1,10 @@
 import com.github.kwhat.jnativehook.GlobalScreen
 import com.github.kwhat.jnativehook.keyboard.NativeKeyEvent
 import com.github.kwhat.jnativehook.keyboard.NativeKeyListener
+import com.sun.jna.Pointer
+import com.sun.jna.platform.win32.User32
+import com.sun.jna.platform.win32.WinDef
+import com.sun.jna.platform.win32.WinUser
 import javax.swing.*
 import java.awt.*
 import java.awt.datatransfer.StringSelection
@@ -64,6 +68,8 @@ fun runTimer() {
                     val selection = StringSelection(text.plus(System.currentTimeMillis().toString()))
                     clipboard.setContents(selection, null)
                 }
+
+                focusMapleStoryWindow();
             }
         }.apply { start() }
     } else {
@@ -92,6 +98,7 @@ fun registerGlobalShortcut() {
                 refreshButton.doClick()
             }
         }
+
         override fun nativeKeyReleased(e: NativeKeyEvent) {}
         override fun nativeKeyTyped(e: NativeKeyEvent) {}
     })
@@ -109,10 +116,27 @@ fun formatNumber(number: Int): String {
     return String.format("%02d", number)
 }
 
-fun formatDate(date: LocalDateTime): String {
-    return date.run {
-        "${formatNumber(hour)}:${formatNumber(minute)}:${formatNumber(second)}"
+fun focusMapleStoryWindow() {
+    val user32 = User32.INSTANCE
+
+    val enumProc = object : WinUser.WNDENUMPROC {
+        override fun callback(hWnd: WinDef.HWND?, lParam: Pointer?): Boolean {
+            if (hWnd != null) {
+                val sb = CharArray(512)
+                user32.GetWindowText(hWnd, sb, 512)
+                val title = String(sb).trim { it <= ' ' }
+
+                if (title.contains("Mapleland", ignoreCase = true)) {
+                    user32.ShowWindow(hWnd, WinUser.SW_RESTORE)
+                    user32.SetForegroundWindow(hWnd)
+                    return false
+                }
+            }
+            return true
+        }
     }
+
+    user32.EnumWindows(enumProc, null)
 }
 
 fun main() {
