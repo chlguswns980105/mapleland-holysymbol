@@ -17,17 +17,20 @@ import java.time.LocalDateTime
 
 val frame = JFrame("타이머")
 val inputField = JTextField(10).apply { text = "120" }
-const val defaultRemainText = "남은 시간: "
-val remainLabel = JLabel(defaultRemainText)
-var currentRefreshKey = "R"
+
+val remainLabel = JLabel("남은 시간: ")
+
 val refreshButton = JButton("갱신하기").apply { isVisible = false }
+val changeKeyButton = JButton("")
+var currentShortcutKeyCode = NativeKeyEvent.VC_R  // ← 현재 단축키 기본값 (R)
+
 val startHour = JTextField("00")
 val startMin = JTextField("00")
+
 val callSymCheck = JCheckBox("타이머 끝날 때 ㄱㄱ복사", null, true)
 val clipboard = Toolkit.getDefaultToolkit().systemClipboard
 
 var timer: Timer? = null
-var currentShortcutKeyCode = NativeKeyEvent.VC_R  // ← 현재 단축키 기본값
 
 fun playSound(resourcePath: String) {
     try {
@@ -80,7 +83,7 @@ fun runTimer() {
 
 fun stopTimer() {
     timer?.stop()
-    remainLabel.text = defaultRemainText
+    remainLabel.text = "남은 시간: "
     refreshButton.isVisible = false
 }
 
@@ -168,7 +171,6 @@ fun main() {
     val guideText = JLabel("설정 시간(초):")
     val startButton = JButton("시작하기")
     val endButton = JButton("종료하기")
-    val changeKeyButton = JButton("단축키 변경")
 
     inputPanel.add(guideText)
     inputPanel.add(inputField)
@@ -176,9 +178,7 @@ fun main() {
     inputPanel.add(endButton)
 
     val shortCutPanel = JPanel(FlowLayout(FlowLayout.LEFT))
-    val shortCutLabel = JLabel("현재 갱신 단축키: $currentRefreshKey")
-    shortCutPanel.add(shortCutLabel)
-    shortCutPanel.add(changeKeyButton)
+    shortCutPanel.add(changeKeyButton).also { setChangeButtonText() }
     shortCutPanel.add(refreshButton)
     shortCutPanel.add(remainLabel)
 
@@ -223,9 +223,8 @@ fun main() {
         GlobalScreen.addNativeKeyListener(object : NativeKeyListener {
             override fun nativeKeyPressed(e: NativeKeyEvent) {
                 currentShortcutKeyCode = e.keyCode
-                currentRefreshKey = NativeKeyEvent.getKeyText(currentShortcutKeyCode)
-                shortCutLabel.text = "현재 갱신 단축키: $currentRefreshKey"
                 dialogWindow.dispose() // ← 키 입력 시 안내창 닫기
+                setChangeButtonText()
                 GlobalScreen.removeNativeKeyListener(this)
             }
 
@@ -233,4 +232,9 @@ fun main() {
             override fun nativeKeyTyped(e: NativeKeyEvent) {}
         })
     }
+}
+
+fun setChangeButtonText() {
+    val key = NativeKeyEvent.getKeyText(currentShortcutKeyCode)
+    changeKeyButton.text = "갱신 키 변경 (현재 $key)"
 }
