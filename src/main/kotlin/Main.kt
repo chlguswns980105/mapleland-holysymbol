@@ -23,8 +23,7 @@ var currentRefreshKey = "R"
 val refreshButton = JButton("갱신하기").apply { isVisible = false }
 val startHour = JTextField("00")
 val startMin = JTextField("00")
-val callSymCheck = JCheckBox()
-val callSymCheckLabel = JLabel("타이머 끝날 때 ㄱㄱ복사")
+val callSymCheck = JCheckBox("타이머 끝날 때 ㄱㄱ복사", null, true)
 val clipboard = Toolkit.getDefaultToolkit().systemClipboard
 
 var timer: Timer? = null
@@ -129,7 +128,11 @@ fun focusMapleStoryWindow() {
                 user32.GetWindowText(hWnd, sb, 512)
                 val title = String(sb).trim { it <= ' ' }
 
-                if (title.contains("Mapleland", ignoreCase = true)) {
+                val c1 = title.contains("MapleStory Worlds", ignoreCase = true)
+                val c2 = title.contains("Mapleland", ignoreCase = true)
+
+                // 메월드, 메랜 모두 포함일 때 (메랜지지 등 메이플랜드 포함일 때 포커스 꼬임)
+                if (c1 && c2) {
                     // 최소화된 창이면 복원
                     user32.ShowWindow(hWnd, WinUser.SW_RESTORE)
 
@@ -185,7 +188,6 @@ fun main() {
     resultPanel.add(startHour)
     resultPanel.add(startMin)
     resultPanel.add(callSymCheck)
-    resultPanel.add(callSymCheckLabel)
 
     val mainPanel = JPanel()
     mainPanel.layout = BoxLayout(mainPanel, BoxLayout.Y_AXIS)
