@@ -27,7 +27,9 @@ var currentShortcutKeyCode = NativeKeyEvent.VC_R  // ← 현재 단축키 기본
 val startHour = JTextField("00")
 val startMin = JTextField("00")
 
-val callSymCheck = JCheckBox("타이머 끝날 때 ㄱㄱ복사", null, true)
+val callSymCheck = JCheckBox("끝날 때 ㄱㄱ복사", null, true)
+val forceFocus = JCheckBox("끝날 때 메랜 포커스", null, true)
+
 val clipboard = Toolkit.getDefaultToolkit().systemClipboard
 
 var timer: Timer? = null
@@ -73,7 +75,8 @@ fun runTimer() {
                     clipboard.setContents(selection, null)
                 }
 
-                focusMapleStoryWindow();
+                // 포커싱 체크했을 때 메랜으로 포커스
+                if (forceFocus.isSelected) focusMapleStoryWindow();
             }
         }.apply { start() }
     } else {
@@ -169,8 +172,8 @@ fun main() {
 
     val inputPanel = JPanel(FlowLayout(FlowLayout.LEFT))
     val guideText = JLabel("설정 시간(초):")
-    val startButton = JButton("시작하기")
-    val endButton = JButton("종료하기")
+    val startButton = JButton("시작")
+    val endButton = JButton("종료")
 
     inputPanel.add(guideText)
     inputPanel.add(inputField)
@@ -187,7 +190,12 @@ fun main() {
     resultPanel.add(startTimeButton)
     resultPanel.add(startHour)
     resultPanel.add(startMin)
-    resultPanel.add(callSymCheck)
+
+    val checkBoxPanel = JPanel()
+    checkBoxPanel.layout = BoxLayout(checkBoxPanel, BoxLayout.Y_AXIS)
+    checkBoxPanel.add(callSymCheck)
+    checkBoxPanel.add(forceFocus)
+    resultPanel.add(checkBoxPanel)
 
     val mainPanel = JPanel()
     mainPanel.layout = BoxLayout(mainPanel, BoxLayout.Y_AXIS)
@@ -196,7 +204,7 @@ fun main() {
     mainPanel.add(resultPanel)
 
     frame.add(mainPanel)
-    frame.setSize(420, 155)
+    frame.setSize(350, 170)
     frame.defaultCloseOperation = JFrame.EXIT_ON_CLOSE
     frame.isVisible = true
     frame.isAlwaysOnTop = true
@@ -236,5 +244,5 @@ fun main() {
 
 fun setChangeButtonText() {
     val key = NativeKeyEvent.getKeyText(currentShortcutKeyCode)
-    changeKeyButton.text = "갱신 키 변경 (현재 $key)"
+    changeKeyButton.text = "갱신 단축키 변경 (현재 $key)"
 }
