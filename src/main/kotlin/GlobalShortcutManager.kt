@@ -60,23 +60,31 @@ class GlobalShortcutManager {
         dialogTitle: String
     ) {
         changeKeyButton.addActionListener {
-            val dialog = JOptionPane("변경할 키를 눌러주세요.", JOptionPane.INFORMATION_MESSAGE)
-            val dialogWindow = dialog.createDialog(owner, dialogTitle)
-            dialogWindow.isModal = false
-            dialogWindow.isVisible = true
-
-            GlobalScreen.addNativeKeyListener(object : NativeKeyListener {
-                override fun nativeKeyPressed(e: NativeKeyEvent) {
-                    shortcutKeyCodes[shortcutId] = e.keyCode
-                    dialogWindow.dispose()
-                    updateShortcutLabel(shortcutId)
-                    GlobalScreen.removeNativeKeyListener(this)
-                }
-
-                override fun nativeKeyReleased(e: NativeKeyEvent) {}
-                override fun nativeKeyTyped(e: NativeKeyEvent) {}
-            })
+            openChangeShortcutDialog(owner, shortcutId, dialogTitle)
         }
+    }
+
+    fun bindChangeShortcutDialog(owner: Component, shortcutId: String, dialogTitle: String) {
+        openChangeShortcutDialog(owner, shortcutId, dialogTitle)
+    }
+
+    private fun openChangeShortcutDialog(owner: Component, shortcutId: String, dialogTitle: String) {
+        val dialog = JOptionPane("변경할 키를 눌러주세요.", JOptionPane.INFORMATION_MESSAGE)
+        val dialogWindow = dialog.createDialog(owner, dialogTitle)
+        dialogWindow.isModal = false
+        dialogWindow.isVisible = true
+
+        GlobalScreen.addNativeKeyListener(object : NativeKeyListener {
+            override fun nativeKeyPressed(e: NativeKeyEvent) {
+                shortcutKeyCodes[shortcutId] = e.keyCode
+                dialogWindow.dispose()
+                updateShortcutLabel(shortcutId)
+                GlobalScreen.removeNativeKeyListener(this)
+            }
+
+            override fun nativeKeyReleased(e: NativeKeyEvent) {}
+            override fun nativeKeyTyped(e: NativeKeyEvent) {}
+        })
     }
 
     private fun refreshAllShortcutLabels() {

@@ -1,4 +1,7 @@
+import java.awt.Color
 import java.awt.FlowLayout
+import java.awt.Font
+import javax.swing.Box
 import javax.swing.BoxLayout
 import javax.swing.JButton
 import javax.swing.JCheckBox
@@ -29,9 +32,6 @@ data class MainWindow(
     val leftWyvernField: JTextField,
     val middleWyvernField: JTextField,
     val rightWyvernField: JTextField,
-    val leftWyvernPlusButton: JButton,
-    val middleWyvernPlusButton: JButton,
-    val rightWyvernPlusButton: JButton,
     val leftWyvernKeyButton: JButton,
     val middleWyvernKeyButton: JButton,
     val rightWyvernKeyButton: JButton
@@ -41,8 +41,17 @@ fun createMainWindow(): MainWindow {
     val frame = JFrame("타이머")
     val inputField = JTextField(10).apply { text = "120" }
     val remainLabel = JLabel("남은 시간: ")
-    val refreshButton = JButton("갱신하기").apply { isVisible = false }
-    val changeKeyButton = JButton("")
+    val refreshButton = JButton("갱신하기").apply {
+        isVisible = false
+        font = Font(font.name, Font.PLAIN, 12)
+        preferredSize = java.awt.Dimension(100, 35)
+        foreground = Color.BLACK
+    }
+    val changeKeyButton = JButton("").apply {
+        font = Font(font.name, Font.PLAIN, 11)
+        preferredSize = java.awt.Dimension(140, 32)
+        foreground = Color.BLACK
+    }
 
     val startHour = JTextField("00", 2)
     val startMin = JTextField("00", 2)
@@ -50,23 +59,52 @@ fun createMainWindow(): MainWindow {
     val callSymCheck = JCheckBox("끝날 때 ㄱㄱ복사", null, true)
     val forceFocus = JCheckBox("끝날 때 메랜 포커스", null, true)
 
-    val startButton = JButton("시작")
-    val endButton = JButton("종료")
-    val startTimeButton = JButton("시작시간 갱신")
+    val startButton = JButton("시작").apply {
+        font = Font(font.name, Font.PLAIN, 12)
+        preferredSize = java.awt.Dimension(60, 32)
+        foreground = Color.BLACK
+    }
+    val endButton = JButton("종료").apply {
+        font = Font(font.name, Font.PLAIN, 12)
+        preferredSize = java.awt.Dimension(60, 32)
+        foreground = Color.BLACK
+    }
+    val startTimeButton = JButton("시작시간 갱신").apply {
+        font = Font(font.name, Font.PLAIN, 11)
+        preferredSize = java.awt.Dimension(100, 32)
+        foreground = Color.BLACK
+    }
 
     val leftWyvernField = JTextField("0", 5)
     val middleWyvernField = JTextField("0", 5)
     val rightWyvernField = JTextField("0", 5)
 
-    val leftWyvernPlusButton = JButton("좌 +1")
-    val middleWyvernPlusButton = JButton("중 +1")
-    val rightWyvernPlusButton = JButton("우 +1")
+    val leftWyvernKeyButton = JButton("좌 (F9)").apply {
+        font = Font(font.name, Font.PLAIN, 10)
+        preferredSize = java.awt.Dimension(100, 28)
+        foreground = Color.BLACK
+    }
+    val middleWyvernKeyButton = JButton("중 (F10)").apply {
+        font = Font(font.name, Font.PLAIN, 10)
+        preferredSize = java.awt.Dimension(100, 28)
+        foreground = Color.BLACK
+    }
+    val rightWyvernKeyButton = JButton("우 (F11)").apply {
+        font = Font(font.name, Font.PLAIN, 10)
+        preferredSize = java.awt.Dimension(100, 28)
+        foreground = Color.BLACK
+    }
 
-    val leftWyvernKeyButton = JButton("")
-    val middleWyvernKeyButton = JButton("")
-    val rightWyvernKeyButton = JButton("")
+    val numberFields = listOf(
+        inputField,
+        startHour,
+        startMin,
+        leftWyvernField,
+        middleWyvernField,
+        rightWyvernField,
+    )
 
-    listOf(inputField, startHour, startMin, leftWyvernField, middleWyvernField, rightWyvernField).forEach {
+    numberFields.forEach {
         (it.document as? AbstractDocument)?.documentFilter = NumericDocumentFilter()
     }
 
@@ -103,32 +141,26 @@ fun createMainWindow(): MainWindow {
         add(resultPanel)
     }
 
-    val leftRow = JPanel(FlowLayout(FlowLayout.LEFT)).apply {
+    val wyvernCounterRow = JPanel(FlowLayout(FlowLayout.LEFT, 5, 0)).apply {
         add(JLabel("좌:"))
         add(leftWyvernField)
-        add(leftWyvernPlusButton)
-        add(leftWyvernKeyButton)
-    }
-
-    val middleRow = JPanel(FlowLayout(FlowLayout.LEFT)).apply {
         add(JLabel("중:"))
         add(middleWyvernField)
-        add(middleWyvernPlusButton)
-        add(middleWyvernKeyButton)
-    }
-
-    val rightRow = JPanel(FlowLayout(FlowLayout.LEFT)).apply {
         add(JLabel("우:"))
         add(rightWyvernField)
-        add(rightWyvernPlusButton)
+    }
+
+    val wyvernButtonRow2 = JPanel(FlowLayout(FlowLayout.LEFT, 5, 0)).apply {
+        add(leftWyvernKeyButton)
+        add(middleWyvernKeyButton)
         add(rightWyvernKeyButton)
     }
 
     val wyvernPanel = JPanel().apply {
         layout = BoxLayout(this, BoxLayout.Y_AXIS)
-        add(leftRow)
-        add(middleRow)
-        add(rightRow)
+        add(wyvernCounterRow)
+        add(wyvernButtonRow2)
+        add(Box.createVerticalGlue())
     }
 
     val tabbedPane = JTabbedPane().apply {
@@ -137,7 +169,7 @@ fun createMainWindow(): MainWindow {
     }
 
     frame.add(tabbedPane)
-    frame.setSize(520, 250)
+    frame.setSize(360, 220)
     frame.defaultCloseOperation = JFrame.EXIT_ON_CLOSE
     frame.isVisible = true
     frame.isAlwaysOnTop = true
@@ -161,9 +193,6 @@ fun createMainWindow(): MainWindow {
         leftWyvernField = leftWyvernField,
         middleWyvernField = middleWyvernField,
         rightWyvernField = rightWyvernField,
-        leftWyvernPlusButton = leftWyvernPlusButton,
-        middleWyvernPlusButton = middleWyvernPlusButton,
-        rightWyvernPlusButton = rightWyvernPlusButton,
         leftWyvernKeyButton = leftWyvernKeyButton,
         middleWyvernKeyButton = middleWyvernKeyButton,
         rightWyvernKeyButton = rightWyvernKeyButton
