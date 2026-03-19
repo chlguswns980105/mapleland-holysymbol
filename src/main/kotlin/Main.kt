@@ -1,6 +1,8 @@
 import com.github.kwhat.jnativehook.keyboard.NativeKeyEvent
 import javax.swing.JTextField
 import javax.swing.SwingUtilities
+import java.time.LocalTime
+import java.time.format.DateTimeFormatter
 
 fun main() {
     val window = createMainWindow()
@@ -58,6 +60,12 @@ fun main() {
     window.endButton.addActionListener { timerController.stopTimer() }
     window.refreshButton.addActionListener { timerController.runTimer() }
     window.startTimeButton.addActionListener { timerController.updateStartTime() }
+    window.wyvernCurrentTimeButton.addActionListener {
+        val formatter = DateTimeFormatter.ofPattern("HH:mm:ss")
+        val time = LocalTime.now().format(formatter)
+        window.wyvernCurrentTimeField.text = LocalTime.now().format(formatter)
+        clipboardService.copyText(time)
+    }
 
     // 와이번 버튼 클릭 시 단축키 변경 다이얼로그 열기
     window.leftWyvernKeyButton.addActionListener {

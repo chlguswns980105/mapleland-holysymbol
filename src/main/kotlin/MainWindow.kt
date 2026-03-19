@@ -34,7 +34,9 @@ data class MainWindow(
     val rightWyvernField: JTextField,
     val leftWyvernKeyButton: JButton,
     val middleWyvernKeyButton: JButton,
-    val rightWyvernKeyButton: JButton
+    val rightWyvernKeyButton: JButton,
+    val wyvernCurrentTimeButton: JButton,
+    val wyvernCurrentTimeField: JTextField,
 )
 
 fun createMainWindow(): MainWindow {
@@ -95,6 +97,15 @@ fun createMainWindow(): MainWindow {
         foreground = Color.BLACK
     }
 
+    val wyvernCurrentTimeButton = JButton("갱신").apply {
+        font = Font(font.name, Font.PLAIN, 11)
+        preferredSize = java.awt.Dimension(80, 28)
+        foreground = Color.BLACK
+    }
+    val wyvernCurrentTimeField = JTextField("00:00:00", 8).apply {
+        isEditable = false
+    }
+
     val numberFields = listOf(
         inputField,
         startHour,
@@ -150,6 +161,11 @@ fun createMainWindow(): MainWindow {
         add(rightWyvernField)
     }
 
+    val wyvernCurrentTimeRow = JPanel(FlowLayout(FlowLayout.LEFT, 5, 0)).apply {
+        add(wyvernCurrentTimeButton)
+        add(wyvernCurrentTimeField)
+    }
+
     val wyvernButtonRow2 = JPanel(FlowLayout(FlowLayout.LEFT, 5, 0)).apply {
         add(leftWyvernKeyButton)
         add(middleWyvernKeyButton)
@@ -158,6 +174,7 @@ fun createMainWindow(): MainWindow {
 
     val wyvernPanel = JPanel().apply {
         layout = BoxLayout(this, BoxLayout.Y_AXIS)
+        add(wyvernCurrentTimeRow)
         add(wyvernCounterRow)
         add(wyvernButtonRow2)
         add(Box.createVerticalGlue())
@@ -195,6 +212,8 @@ fun createMainWindow(): MainWindow {
         rightWyvernField = rightWyvernField,
         leftWyvernKeyButton = leftWyvernKeyButton,
         middleWyvernKeyButton = middleWyvernKeyButton,
-        rightWyvernKeyButton = rightWyvernKeyButton
+        rightWyvernKeyButton = rightWyvernKeyButton,
+        wyvernCurrentTimeButton = wyvernCurrentTimeButton,
+        wyvernCurrentTimeField = wyvernCurrentTimeField
     )
 }
