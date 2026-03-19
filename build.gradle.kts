@@ -1,4 +1,5 @@
 import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
+import kotlin.text.set
 
 plugins {
     kotlin("jvm") version "1.9.23"
@@ -30,4 +31,7 @@ kotlin {
 tasks.named<ShadowJar>("shadowJar") {
     archiveClassifier.set("") // `-all` 붙지 않게
     mergeServiceFiles()       // JNativeHook 같은 서비스 리소스 충돌 방지
+    manifest {
+        attributes["Main-Class"] = "MainKt"
+    }
 }
